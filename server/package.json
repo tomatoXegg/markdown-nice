@@ -1,0 +1,23 @@
+{
+  "name": "markdown-nice-server",
+  "version": "1.0.0",
+  "description": "API server for markdown-nice",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "cors": "^2.8.5",
+    "markdown-it": "^12.0.0",
+    "markdown-it-katex": "^2.0.3",
+    "markdown-it-highlight": "^0.2.0",
+    "highlight.js": "^10.7.2",
+    "body-parser": "^1.19.0",
+    "dotenv": "^10.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  }
+}
