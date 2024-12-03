@@ -47,13 +47,16 @@ module.exports = {
         },
         heading: {
           boxSizing: 'border-box',
-          margin: '80px 10px 40px 10px',
+          margin: '0',
           padding: '0',
-          textAlign: 'center',
-          fontWeight: 'normal',
-          color: '#3f3f3f',
-          fontSize: '140%',
-          lineHeight: '1.5'
+          marginLeft: '0',
+          color: 'black',
+          fontSize: '24px',
+          textAlign: 'left',
+          fontWeight: 'bold',
+          display: 'table',
+          marginTop: '30px',
+          marginBottom: '15px'
         },
         prefix: {
           boxSizing: 'border-box',
