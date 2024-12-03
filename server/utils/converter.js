@@ -6,22 +6,54 @@ class MarkdownConverter {
   constructor() {
     this.md = new MarkdownIt({
       ...config.markdown,
-      html: true,         // 启用 HTML 标签
-      breaks: true,       // 转换换行符为 <br>
-      linkify: true,      // 将类似 URL 的文本转换为链接
-      typographer: true,  // 启用一些语言中性的替换和引号美化
+      html: true,
+      breaks: true,
+      linkify: true,
+      typographer: true,
       highlight: function (str, lang) {
         if (lang && hljs.getLanguage(lang)) {
           try {
             return hljs.highlight(lang, str).value;
           } catch (__) {}
         }
-        return ''; // 使用默认的转义
+        return '';
       }
     });
 
-    // 添加插件
-    this.md.use(require('markdown-it-katex')); // 数学公式
+    this.md.use(require('markdown-it-katex'));
+  }
+
+  // 将对象样式转换为内联样式字符串
+  styleObjectToString(styleObj) {
+    return Object.entries(styleObj)
+      .map(([key, value]) => {
+        // 转换驼峰命名为连字符命名
+        const cssKey = key.replace(/([A-Z])/g, '-$1').toLowerCase();
+        return `${cssKey}: ${value}`;
+      })
+      .join('; ');
+  }
+
+  // 处理微信公众号的特殊格式
+  processWechatContent(content, styles) {
+    // 处理图片
+    content = content.replace(/<img([^>]*)>/g, (match, attrs) => {
+      return `<figure style="${this.styleObjectToString(styles.figure)}">
+        <img${attrs} class="image" style="${this.styleObjectToString(styles.image)}">
+        <figcaption style="${this.styleObjectToString(styles.figcaption)}"></figcaption>
+      </figure>`;
+    });
+
+    // 处理标题
+    content = content.replace(/<h1([^>]*)>(.*?)<\/h1>/g, (match, attrs, inner) => {
+      return `<h1 style="${this.styleObjectToString(styles.heading)}">
+        <span class="prefix" style="${this.styleObjectToString(styles.prefix)}"></span>
+        <span class="content" style="${this.styleObjectToString(styles.content)}">${inner}</span>
+        <span class="suffix" style="${this.styleObjectToString(styles.suffix)}"></span>
+      </h1>`;
+    });
+
+    return content;
   }
 
   preprocessMarkdown(markdown) {
@@ -88,17 +120,26 @@ class MarkdownConverter {
       // 后处理 HTML
       html = this.postprocessHtml(html, options.theme);
       
-      // 获取主题样式
+      // 获取主题
       const theme = this.getTheme(options.theme);
-      
-      // 组合 HTML 和样式
-      const styledHtml = this.applyTheme(html, theme);
-      
+
+      // 如果是微信公众号主题，使用特殊处理
+      if (theme.name === '微信公众号') {
+        html = this.processWechatContent(html, theme.styles);
+        html = `<section id="md-root" class="themes chengxin fonts-cx" style="${this.styleObjectToString(theme.styles.root)}">${html}</section>`;
+      } else {
+        // 其他主题使用普通样式
+        html = `<div class="markdown-body">${html}</div>`;
+      }
+
       // 计算元数据
-      const meta = this.calculateMeta(processedMarkdown);
-      
+      const meta = {
+        wordCount: processedMarkdown.length,
+        readingTime: Math.ceil(processedMarkdown.length / 500)
+      };
+
       return {
-        html: styledHtml,
+        html,
         meta,
         theme: theme.name
       };
@@ -114,86 +155,6 @@ class MarkdownConverter {
       return config.themes.default;
     }
     return theme;
-  }
-
-  applyTheme(html, theme) {
-    // 为微信公众号优化的输出
-    if (theme.name === '微信公众号') {
-      return `<section class="markdown-body">
-        <style>
-          ${theme.styles}
-          .markdown-body {
-            font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
-            font-size: 16px;
-            line-height: 1.8;
-            word-wrap: break-word;
-            padding: 1em;
-            background: #fff;
-            color: #333;
-          }
-          .markdown-body img {
-            max-width: 100%;
-            height: auto;
-            display: block;
-            margin: 20px auto;
-          }
-          .markdown-body pre {
-            background-color: #f8f8f8;
-            border-radius: 3px;
-            padding: 16px;
-            overflow: auto;
-            line-height: 1.45;
-            margin: 1em 0;
-          }
-          .markdown-body code {
-            background-color: rgba(27,31,35,.05);
-            border-radius: 3px;
-            font-size: 85%;
-            margin: 0;
-            padding: 0.2em 0.4em;
-          }
-          .markdown-body pre > code {
-            background: transparent;
-            padding: 0;
-          }
-        </style>
-        ${html}
-      </section>`;
-    }
-
-    // 其他主题的输出
-    return `<!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <style>
-        ${theme.styles}
-        .markdown-body {
-          box-sizing: border-box;
-          min-width: 200px;
-          max-width: 980px;
-          margin: 0 auto;
-          padding: 45px;
-        }
-        @media (max-width: 767px) {
-          .markdown-body {
-            padding: 15px;
-          }
-        }
-      </style>
-    </head>
-    <body class="markdown-body">
-      ${html}
-    </body>
-    </html>`;
-  }
-
-  calculateMeta(markdown) {
-    return {
-      wordCount: markdown.length,
-      readingTime: Math.ceil(markdown.length / 500), // 粗略估计阅读时间（分钟）
-    };
   }
 }
 

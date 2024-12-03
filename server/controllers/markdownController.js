@@ -9,47 +9,24 @@ class MarkdownController {
       if (!markdown) {
         return res.status(400).json({
           success: false,
-          error: {
-            message: 'Markdown content is required'
-          }
+          error: 'Markdown content is required'
         });
       }
 
-      // 转换 Markdown
+      // 转换 Markdown 为 HTML
       const result = converter.convert(markdown, { theme });
 
-      // 为微信公众号特别处理
-      if (theme === 'wechat') {
-        // 移除多余的 HTML 结构，只保留内容
-        let html = result.html
-          .replace(/<section[^>]*>([\s\S]*)<\/section>/i, '$1')  // 移除外层 section
-          .replace(/<style>[\s\S]*?<\/style>/gi, '')  // 移除样式标签
-          .replace(/\s+/g, ' ')  // 规范化空白字符
-          .trim();
-
-        return res.json({
-          success: true,
-          data: {
-            html,
-            meta: result.meta,
-            theme: result.theme
-          }
-        });
-      }
-
-      // 其他主题返回完整 HTML
+      // 返回结果
       return res.json({
         success: true,
-        data: result
+        data: result.html
       });
+
     } catch (error) {
-      console.error('Conversion error:', error);
-      res.status(500).json({
+      console.error('Markdown conversion error:', error);
+      return res.status(500).json({
         success: false,
-        error: {
-          message: error.message,
-          details: process.env.NODE_ENV === 'development' ? error.stack : undefined
-        }
+        error: error.message || 'Internal server error'
       });
     }
   };
