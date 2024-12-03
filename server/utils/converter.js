@@ -39,11 +39,25 @@ class MarkdownConverter {
         // src = `${baseUrl}${src}`;
       }
 
-      // 添加图片样式和响应式支持
-      return `<figure class="markdown-image">
-        <img src="${src}" alt="${alt}" title="${title}" style="max-width: 100%; height: auto; display: block; margin: 1em auto;">
-        ${title ? `<figcaption style="text-align: center; color: #666; font-size: 0.9em;">${title}</figcaption>` : ''}
-      </figure>`;
+      // 为微信公众号优化的图片标签
+      return `<img src="${src}" alt="${alt}" title="${title}">`;
+    };
+
+    // 自定义代码块渲染规则
+    this.md.renderer.rules.fence = (tokens, idx, options, env, self) => {
+      const token = tokens[idx];
+      const lang = token.info.trim();
+      let code = token.content;
+
+      // 代码高亮
+      if (lang && hljs.getLanguage(lang)) {
+        try {
+          code = hljs.highlight(lang, code).value;
+        } catch (__) {}
+      }
+
+      // 为微信公众号优化的代码块
+      return `<pre class="code-block"><code class="language-${lang}">${code}</code></pre>`;
     };
   }
 
@@ -84,6 +98,17 @@ class MarkdownConverter {
   }
 
   applyTheme(html, theme) {
+    // 为微信公众号优化的输出
+    if (theme.name === '微信公众号') {
+      return `<section class="markdown-body">
+        <style>
+          ${theme.styles}
+        </style>
+        ${html}
+      </section>`;
+    }
+
+    // 其他主题的输出
     return `<!DOCTYPE html>
     <html>
     <head>
@@ -91,7 +116,6 @@ class MarkdownConverter {
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <style>
         ${theme.styles}
-        /* 基础样式 */
         .markdown-body {
           box-sizing: border-box;
           min-width: 200px;
@@ -103,24 +127,6 @@ class MarkdownConverter {
           .markdown-body {
             padding: 15px;
           }
-        }
-        /* 图片样式 */
-        .markdown-image {
-          margin: 1.5em 0;
-        }
-        .markdown-image img {
-          max-width: 100%;
-          height: auto;
-          display: block;
-          margin: 0 auto;
-          border-radius: 4px;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .markdown-image figcaption {
-          margin-top: 0.5em;
-          text-align: center;
-          color: #666;
-          font-size: 0.9em;
         }
       </style>
     </head>

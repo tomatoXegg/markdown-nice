@@ -10,7 +10,6 @@ module.exports = {
     linkify: true,
     typographer: true,
     breaks: true,
-    // 可以在这里添加更多 markdown-it 的配置选项
   },
   
   // 主题配置
@@ -33,6 +32,113 @@ module.exports = {
         pre code { display: block; padding: 16px; overflow: auto; }
       `
     },
+    wechat: {
+      name: '微信公众号',
+      styles: `
+        /* 微信公众号样式 */
+        section {
+          font-family: -apple-system-font,BlinkMacSystemFont,"Helvetica Neue","PingFang SC","Hiragino Sans GB","Microsoft YaHei UI","Microsoft YaHei",Arial,sans-serif;
+          font-size: 16px;
+          color: #3f3f3f;
+          line-height: 1.8;
+          padding: 0 16px;
+        }
+        /* 标题 */
+        h1 {
+          font-size: 24px;
+          font-weight: bold;
+          margin-bottom: 20px;
+          color: #1a1a1a;
+          text-align: center;
+        }
+        h2 {
+          font-size: 20px;
+          font-weight: bold;
+          margin: 30px 0 20px;
+          padding-bottom: 10px;
+          border-bottom: 1px solid #f0f0f0;
+          color: #1a1a1a;
+        }
+        h3 {
+          font-size: 18px;
+          font-weight: bold;
+          margin: 20px 0 15px;
+          color: #1a1a1a;
+        }
+        /* 段落 */
+        p {
+          margin: 0 0 1em;
+          line-height: 1.8;
+        }
+        /* 引用 */
+        blockquote {
+          margin: 1em 0;
+          padding: 15px;
+          background: #f5f5f5;
+          border-left: 4px solid #07c160;
+          color: #666;
+        }
+        /* 代码 */
+        code {
+          background: #f8f8f8;
+          padding: 2px 5px;
+          border-radius: 2px;
+          color: #e96900;
+          font-family: Consolas, Inconsolata, Courier, monospace;
+        }
+        pre {
+          margin: 1em 0;
+          padding: 16px;
+          background: #f8f8f8;
+          border-radius: 4px;
+          overflow: auto;
+        }
+        pre code {
+          padding: 0;
+          background: none;
+          color: #333;
+          font-size: 14px;
+        }
+        /* 列表 */
+        ul, ol {
+          margin: 10px 0;
+          padding-left: 20px;
+        }
+        li {
+          margin: 5px 0;
+        }
+        /* 图片 */
+        img {
+          max-width: 100%;
+          margin: 10px auto;
+          display: block;
+          border-radius: 4px;
+        }
+        /* 表格 */
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin: 1em 0;
+        }
+        th, td {
+          border: 1px solid #e8e8e8;
+          padding: 8px;
+          text-align: left;
+        }
+        th {
+          background: #f8f8f8;
+          font-weight: bold;
+        }
+        /* 链接 */
+        a {
+          color: #07c160;
+          text-decoration: none;
+        }
+        a:hover {
+          text-decoration: underline;
+        }
+      `
+    },
     elegant: {
       name: 'Elegant',
       styles: `
@@ -50,16 +156,6 @@ module.exports = {
         code { background: #2d2d2d; color: #e0e0e0; border-radius: 4px; }
         pre code { display: block; padding: 1em; }
         blockquote { border-left: 4px solid #404040; background: #2d2d2d; }
-      `
-    },
-    wechat: {
-      name: '微信公众号',
-      styles: `
-        body { font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
-        h1, h2, h3 { font-weight: 700; color: #3f3f3f; }
-        code { background: #f8f8f8; border-radius: 2px; padding: 2px 4px; }
-        pre code { display: block; padding: 1em; }
-        blockquote { border-left: 4px solid #07c160; background: #f8f8f8; }
       `
     }
   },
