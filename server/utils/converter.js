@@ -27,16 +27,41 @@ class MarkdownConverter {
       // 转换 Markdown 为 HTML
       const html = this.md.render(markdown);
       
+      // 获取主题样式
+      const theme = this.getTheme(options.theme);
+      
+      // 组合 HTML 和样式
+      const styledHtml = this.applyTheme(html, theme);
+      
       // 计算元数据
       const meta = this.calculateMeta(markdown);
       
       return {
-        html,
-        meta
+        html: styledHtml,
+        meta,
+        theme: theme.name
       };
     } catch (error) {
       throw new Error(`Markdown conversion failed: ${error.message}`);
     }
+  }
+
+  getTheme(themeName = 'default') {
+    const theme = config.themes[themeName];
+    if (!theme) {
+      console.warn(`Theme '${themeName}' not found, using default theme`);
+      return config.themes.default;
+    }
+    return theme;
+  }
+
+  applyTheme(html, theme) {
+    return `
+      <style>
+        ${theme.styles}
+      </style>
+      ${html}
+    `;
   }
 
   calculateMeta(markdown) {
