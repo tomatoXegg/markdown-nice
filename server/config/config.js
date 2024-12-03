@@ -58,6 +58,17 @@ module.exports = {
           marginTop: '30px',
           marginBottom: '15px'
         },
+        h2: {
+          boxSizing: 'border-box',
+          margin: '20px 0',
+          padding: '0',
+          color: 'black',
+          fontSize: '20px',
+          fontWeight: 'bold',
+          textAlign: 'left',
+          lineHeight: '1.5',
+          borderBottom: '1px solid #eee'
+        },
         prefix: {
           boxSizing: 'border-box',
           margin: '0',

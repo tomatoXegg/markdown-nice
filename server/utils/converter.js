@@ -48,6 +48,20 @@ class MarkdownConverter {
       return `<p style="${this.styleObjectToString(styles.paragraph)}">${inner}</p>`;
     });
 
+    // 处理标题
+    content = content.replace(/<h1([^>]*)>(.*?)<\/h1>/g, (match, attrs, inner) => {
+      return `<h1 style="${this.styleObjectToString(styles.heading)}">
+        <span class="prefix" style="${this.styleObjectToString(styles.prefix)}"></span>
+        <span class="content" style="${this.styleObjectToString(styles.content)}">${inner}</span>
+        <span class="suffix" style="${this.styleObjectToString(styles.suffix)}"></span>
+      </h1>`;
+    });
+
+    // 处理二级标题
+    content = content.replace(/<h2([^>]*)>(.*?)<\/h2>/g, (match, attrs, inner) => {
+      return `<h2 style="${this.styleObjectToString(styles.h2)}">${inner}</h2>`;
+    });
+
     // 处理图片，确保移除 alt 属性
     content = content.replace(/<img([^>]*)>/g, (match, attrs) => {
       // 只保留 src 属性
@@ -57,15 +71,6 @@ class MarkdownConverter {
         <img${srcAttr} class="image" style="${this.styleObjectToString(styles.image)}">
         <figcaption style="${this.styleObjectToString(styles.figcaption)}"></figcaption>
       </figure>`;
-    });
-
-    // 处理标题
-    content = content.replace(/<h1([^>]*)>(.*?)<\/h1>/g, (match, attrs, inner) => {
-      return `<h1 style="${this.styleObjectToString(styles.heading)}">
-        <span class="prefix" style="${this.styleObjectToString(styles.prefix)}"></span>
-        <span class="content" style="${this.styleObjectToString(styles.content)}">${inner}</span>
-        <span class="suffix" style="${this.styleObjectToString(styles.suffix)}"></span>
-      </h1>`;
     });
 
     // 处理引用
