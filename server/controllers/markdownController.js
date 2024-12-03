@@ -9,24 +9,28 @@ class MarkdownController {
       if (!markdown) {
         return res.status(400).json({
           success: false,
-          error: 'Markdown content is required'
+          error: {
+            message: 'Markdown content is required'
+          }
         });
       }
 
       // 转换 Markdown 为 HTML
-      const result = converter.convert(markdown, { theme });
+      const html = converter.convert(markdown, { theme });
 
       // 返回结果
       return res.json({
         success: true,
-        data: result.html
+        data: { html }
       });
 
     } catch (error) {
       console.error('Markdown conversion error:', error);
       return res.status(500).json({
         success: false,
-        error: error.message || 'Internal server error'
+        error: {
+          message: error.message || 'Internal server error'
+        }
       });
     }
   };

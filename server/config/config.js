@@ -172,7 +172,7 @@ module.exports = {
       `
     },
     cuizi: {
-      name: '翠子',
+      name: '锤子',
       styles: {
         root: {
           boxSizing: 'border-box',
