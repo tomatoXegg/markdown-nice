@@ -38,7 +38,7 @@ module.exports = {
         root: {
           boxSizing: 'border-box',
           margin: '0',
-          padding: '30px 16px',
+          padding: '0 10px',
           fontSize: '16px',
           fontFamily: 'Optima-Regular, Optima, PingFangSC-light, PingFangTC-light, "PingFang SC", Cambria, Cochin, Georgia, Times, "Times New Roman", serif',
           color: '#3f3f3f',
@@ -109,7 +109,7 @@ module.exports = {
           padding: '0',
           display: 'block',
           margin: '0 auto',
-          width: '80%',
+          width: '100%',
           maxWidth: '100%',
           borderRadius: '6px',
           boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
