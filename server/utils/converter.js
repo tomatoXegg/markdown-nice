@@ -22,52 +22,52 @@ class MarkdownConverter {
 
     // 添加插件
     this.md.use(require('markdown-it-katex')); // 数学公式
+  }
 
-    // 自定义图片渲染规则
-    this.md.renderer.rules.image = (tokens, idx, options, env, self) => {
-      const token = tokens[idx];
-      const srcIndex = token.attrIndex('src');
-      const titleIndex = token.attrIndex('title');
-      const alt = token.content || '';
-      
-      let src = token.attrs[srcIndex][1];
-      const title = titleIndex >= 0 ? token.attrs[titleIndex][1] : '';
+  preprocessMarkdown(markdown) {
+    // 修复标题格式
+    let processed = markdown
+      // 确保标题格式正确（## 标题）
+      .replace(/^(#+)([^\s#])/gm, '$1 $2')
+      // 修复多重标题（# 标题 ## 标题2）
+      .replace(/(#+ [^#\n]+)#+\s/g, '$1\n\n')
+      // 确保段落之间有空行
+      .replace(/\n(?!\n)/g, '\n\n')
+      // 移除多余的空行
+      .replace(/\n{3,}/g, '\n\n')
+      // 修复图片前后的换行
+      .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '\n\n![$1]($2)\n\n');
 
-      // 处理相对路径的图片
-      if (!src.startsWith('http') && !src.startsWith('data:')) {
-        // 如果是相对路径，可以根据需要添加基础URL
-        // src = `${baseUrl}${src}`;
-      }
+    return processed;
+  }
 
-      // 为微信公众号优化的图片标签
-      return `<img src="${src}" alt="${alt}" title="${title}">`;
-    };
-
-    // 自定义代码块渲染规则
-    this.md.renderer.rules.fence = (tokens, idx, options, env, self) => {
-      const token = tokens[idx];
-      const lang = token.info.trim();
-      let code = token.content;
-
-      // 代码高亮
-      if (lang && hljs.getLanguage(lang)) {
-        try {
-          code = hljs.highlight(lang, code).value;
-        } catch (__) {}
-      }
-
-      // 为微信公众号优化的代码块
-      return `<pre class="code-block"><code class="language-${lang}">${code}</code></pre>`;
-    };
+  postprocessHtml(html) {
+    return html
+      // 修复段落嵌套
+      .replace(/<p><p>/g, '<p>')
+      .replace(/<\/p><\/p>/g, '</p>')
+      // 确保图片独立成段
+      .replace(/<p>(<img[^>]+>)<\/p>/g, '<section class="img-wrapper">$1</section>')
+      // 修复标题格式
+      .replace(/<h(\d)>([^<]+)<\/h\1>/g, (match, level, content) => {
+        // 提取实际的标题内容
+        const titleContent = content.split(/#+\s*/g).pop() || content;
+        return `<h${level}>${titleContent.trim()}</h${level}>`;
+      })
+      // 添加段落间距
+      .replace(/<\/p>\s*<p>/g, '</p>\n<p>');
   }
 
   convert(markdown, options = {}) {
     try {
-      // 确保换行符正确
-      const normalizedMarkdown = markdown.replace(/\\n/g, '\n');
+      // 预处理 Markdown
+      const processedMarkdown = this.preprocessMarkdown(markdown);
       
       // 转换 Markdown 为 HTML
-      const html = this.md.render(normalizedMarkdown);
+      let html = this.md.render(processedMarkdown);
+      
+      // 后处理 HTML
+      html = this.postprocessHtml(html);
       
       // 获取主题样式
       const theme = this.getTheme(options.theme);
@@ -76,7 +76,7 @@ class MarkdownConverter {
       const styledHtml = this.applyTheme(html, theme);
       
       // 计算元数据
-      const meta = this.calculateMeta(normalizedMarkdown);
+      const meta = this.calculateMeta(processedMarkdown);
       
       return {
         html: styledHtml,
@@ -100,10 +100,19 @@ class MarkdownConverter {
   applyTheme(html, theme) {
     // 为微信公众号优化的输出
     if (theme.name === '微信公众号') {
+      const styles = theme.styles + `
+        .img-wrapper {
+          text-align: center;
+          margin: 20px 0;
+        }
+        .img-wrapper img {
+          max-width: 100%;
+          height: auto;
+        }
+      `;
+      
       return `<section class="markdown-body">
-        <style>
-          ${theme.styles}
-        </style>
+        <style>${styles}</style>
         ${html}
       </section>`;
     }
