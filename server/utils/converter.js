@@ -22,8 +22,29 @@ class MarkdownConverter {
 
     // 添加插件
     this.md.use(require('markdown-it-katex')); // 数学公式
-    
-    // 可以在这里添加更多插件
+
+    // 自定义图片渲染规则
+    this.md.renderer.rules.image = (tokens, idx, options, env, self) => {
+      const token = tokens[idx];
+      const srcIndex = token.attrIndex('src');
+      const titleIndex = token.attrIndex('title');
+      const alt = token.content || '';
+      
+      let src = token.attrs[srcIndex][1];
+      const title = titleIndex >= 0 ? token.attrs[titleIndex][1] : '';
+
+      // 处理相对路径的图片
+      if (!src.startsWith('http') && !src.startsWith('data:')) {
+        // 如果是相对路径，可以根据需要添加基础URL
+        // src = `${baseUrl}${src}`;
+      }
+
+      // 添加图片样式和响应式支持
+      return `<figure class="markdown-image">
+        <img src="${src}" alt="${alt}" title="${title}" style="max-width: 100%; height: auto; display: block; margin: 1em auto;">
+        ${title ? `<figcaption style="text-align: center; color: #666; font-size: 0.9em;">${title}</figcaption>` : ''}
+      </figure>`;
+    };
   }
 
   convert(markdown, options = {}) {
@@ -83,6 +104,24 @@ class MarkdownConverter {
             padding: 15px;
           }
         }
+        /* 图片样式 */
+        .markdown-image {
+          margin: 1.5em 0;
+        }
+        .markdown-image img {
+          max-width: 100%;
+          height: auto;
+          display: block;
+          margin: 0 auto;
+          border-radius: 4px;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .markdown-image figcaption {
+          margin-top: 0.5em;
+          text-align: center;
+          color: #666;
+          font-size: 0.9em;
+        }
       </style>
     </head>
     <body class="markdown-body">
@@ -95,7 +134,6 @@ class MarkdownConverter {
     return {
       wordCount: markdown.length,
       readingTime: Math.ceil(markdown.length / 500), // 粗略估计阅读时间（分钟）
-      // 可以添加更多元数据
     };
   }
 }
