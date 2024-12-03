@@ -8,9 +8,7 @@ class MarkdownController {
       if (!markdown) {
         return res.status(400).json({
           success: false,
-          error: {
-            message: 'Markdown content is required'
-          }
+          data: 'Markdown content is required'
         });
       }
 
@@ -20,20 +18,14 @@ class MarkdownController {
       // 返回结果
       return res.json({
         success: true,
-        data: {
-          html: result.html,
-          meta: result.meta,
-          theme: result.theme
-        }
+        data: result.html
       });
 
     } catch (error) {
       console.error('Markdown conversion error:', error);
       return res.status(500).json({
         success: false,
-        error: {
-          message: error.message || 'Internal server error'
-        }
+        data: error.message || 'Internal server error'
       });
     }
   };
