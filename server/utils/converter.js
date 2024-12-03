@@ -27,6 +27,8 @@ class MarkdownConverter {
   preprocessMarkdown(markdown) {
     // 修复标题格式
     let processed = markdown
+      // 移除开头的空白行
+      .trim()
       // 确保标题格式正确（## 标题）
       .replace(/^(#+)([^\s#])/gm, '$1 $2')
       // 修复多重标题（# 标题 ## 标题2）
@@ -36,26 +38,43 @@ class MarkdownConverter {
       // 移除多余的空行
       .replace(/\n{3,}/g, '\n\n')
       // 修复图片前后的换行
-      .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '\n\n![$1]($2)\n\n');
+      .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '\n\n![$1]($2)\n\n')
+      // 修复标题前的换行
+      .replace(/([^\n])(\n#+\s)/g, '$1\n\n$2');
 
     return processed;
   }
 
-  postprocessHtml(html) {
-    return html
-      // 修复段落嵌套
+  postprocessHtml(html, theme) {
+    let processed = html
+      // 移除多余的段落标签
       .replace(/<p><p>/g, '<p>')
       .replace(/<\/p><\/p>/g, '</p>')
-      // 确保图片独立成段
-      .replace(/<p>(<img[^>]+>)<\/p>/g, '<section class="img-wrapper">$1</section>')
       // 修复标题格式
       .replace(/<h(\d)>([^<]+)<\/h\1>/g, (match, level, content) => {
-        // 提取实际的标题内容
         const titleContent = content.split(/#+\s*/g).pop() || content;
         return `<h${level}>${titleContent.trim()}</h${level}>`;
       })
-      // 添加段落间距
-      .replace(/<\/p>\s*<p>/g, '</p>\n<p>');
+      // 处理图片
+      .replace(/<p>(<img[^>]+>)<\/p>/g, (match, img) => {
+        if (theme === 'wechat') {
+          return `<p style="text-align: center;">${img}</p>`;
+        }
+        return `<section class="img-wrapper">${img}</section>`;
+      })
+      // 修复段落间距
+      .replace(/<\/p>\s*<p>/g, '</p>\n<p>')
+      // 移除空段落
+      .replace(/<p>\s*<\/p>/g, '')
+      // 修复列表格式
+      .replace(/<\/(ol|ul)>\s*<(ol|ul)>/g, '</\$1>\n<\$2>')
+      // 修复代码块格式
+      .replace(/<pre><code>/g, '<pre class="code-block"><code>')
+      // 移除多余的换行和空格
+      .replace(/\n\s+/g, '\n')
+      .trim();
+
+    return processed;
   }
 
   convert(markdown, options = {}) {
@@ -67,7 +86,7 @@ class MarkdownConverter {
       let html = this.md.render(processedMarkdown);
       
       // 后处理 HTML
-      html = this.postprocessHtml(html);
+      html = this.postprocessHtml(html, options.theme);
       
       // 获取主题样式
       const theme = this.getTheme(options.theme);
@@ -100,19 +119,44 @@ class MarkdownConverter {
   applyTheme(html, theme) {
     // 为微信公众号优化的输出
     if (theme.name === '微信公众号') {
-      const styles = theme.styles + `
-        .img-wrapper {
-          text-align: center;
-          margin: 20px 0;
-        }
-        .img-wrapper img {
-          max-width: 100%;
-          height: auto;
-        }
-      `;
-      
       return `<section class="markdown-body">
-        <style>${styles}</style>
+        <style>
+          ${theme.styles}
+          .markdown-body {
+            font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+            font-size: 16px;
+            line-height: 1.8;
+            word-wrap: break-word;
+            padding: 1em;
+            background: #fff;
+            color: #333;
+          }
+          .markdown-body img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 20px auto;
+          }
+          .markdown-body pre {
+            background-color: #f8f8f8;
+            border-radius: 3px;
+            padding: 16px;
+            overflow: auto;
+            line-height: 1.45;
+            margin: 1em 0;
+          }
+          .markdown-body code {
+            background-color: rgba(27,31,35,.05);
+            border-radius: 3px;
+            font-size: 85%;
+            margin: 0;
+            padding: 0.2em 0.4em;
+          }
+          .markdown-body pre > code {
+            background: transparent;
+            padding: 0;
+          }
+        </style>
         ${html}
       </section>`;
     }
