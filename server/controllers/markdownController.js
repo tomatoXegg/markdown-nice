@@ -4,7 +4,7 @@ class MarkdownController {
   // 将方法改为箭头函数，以保持 this 绑定
   convert = async (req, res) => {
     try {
-      const { markdown, theme = 'default', options = {} } = req.body;
+      const { markdown, theme = 'default' } = req.body;
       
       if (!markdown) {
         return res.status(400).json({
@@ -16,16 +16,12 @@ class MarkdownController {
       }
 
       // 转换 Markdown
-      const { html, meta } = converter.convert(markdown, options);
+      const result = converter.convert(markdown, { theme });
       
       // 返回结果
       res.json({
         success: true,
-        data: {
-          html,
-          theme,
-          meta
-        }
+        data: result
       });
     } catch (error) {
       console.error('Conversion error:', error);
@@ -33,11 +29,11 @@ class MarkdownController {
         success: false,
         error: {
           message: error.message,
-          stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+          details: process.env.NODE_ENV === 'development' ? error.stack : undefined
         }
       });
     }
-  }
+  };
 }
 
 module.exports = new MarkdownController();
