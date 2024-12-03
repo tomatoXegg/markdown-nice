@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const path = require('path');
 const apiRoutes = require('./routes/api');
 
 const app = express();
@@ -10,12 +11,20 @@ app.use(cors());
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// 静态文件服务
+app.use(express.static(path.join(__dirname, 'public')));
+
 // API 路由
 app.use('/api', apiRoutes);
 
 // 健康检查端点
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
+});
+
+// 测试页面路由
+app.get('/test', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'test.html'));
 });
 
 // 错误处理中间件
