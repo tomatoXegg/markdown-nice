@@ -1,7 +1,6 @@
 const converter = require('../utils/converter');
 
 class MarkdownController {
-  // 将方法改为箭头函数，以保持 this 绑定
   convert = async (req, res) => {
     try {
       const { markdown, theme = 'wechat' } = req.body;
@@ -16,12 +15,16 @@ class MarkdownController {
       }
 
       // 转换 Markdown 为 HTML
-      const html = converter.convert(markdown, { theme });
+      const result = converter.convert(markdown, { theme });
 
       // 返回结果
       return res.json({
         success: true,
-        data: { html }
+        data: {
+          html: result.html,
+          meta: result.meta,
+          theme: result.theme
+        }
       });
 
     } catch (error) {
