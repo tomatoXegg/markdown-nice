@@ -20,6 +20,13 @@ class MarkdownConverter {
       }
     });
 
+    // 自定义图片渲染规则，移除 alt 文本
+    this.md.renderer.rules.image = (tokens, idx) => {
+      const token = tokens[idx];
+      const src = token.attrGet('src');
+      return `<img src="${src}">`;
+    };
+
     this.md.use(require('markdown-it-katex'));
   }
 
@@ -36,10 +43,18 @@ class MarkdownConverter {
 
   // 处理微信公众号的特殊格式
   processWechatContent(content, styles) {
-    // 处理图片
+    // 处理段落
+    content = content.replace(/<p([^>]*)>(.*?)<\/p>/g, (match, attrs, inner) => {
+      return `<p style="${this.styleObjectToString(styles.paragraph)}">${inner}</p>`;
+    });
+
+    // 处理图片，确保移除 alt 属性
     content = content.replace(/<img([^>]*)>/g, (match, attrs) => {
+      // 只保留 src 属性
+      const src = attrs.match(/src="([^"]*)"/);
+      const srcAttr = src ? ` src="${src[1]}"` : '';
       return `<figure style="${this.styleObjectToString(styles.figure)}">
-        <img${attrs} class="image" style="${this.styleObjectToString(styles.image)}">
+        <img${srcAttr} class="image" style="${this.styleObjectToString(styles.image)}">
         <figcaption style="${this.styleObjectToString(styles.figcaption)}"></figcaption>
       </figure>`;
     });
@@ -51,6 +66,38 @@ class MarkdownConverter {
         <span class="content" style="${this.styleObjectToString(styles.content)}">${inner}</span>
         <span class="suffix" style="${this.styleObjectToString(styles.suffix)}"></span>
       </h1>`;
+    });
+
+    // 处理引用
+    content = content.replace(/<blockquote([^>]*)>(.*?)<\/blockquote>/g, (match, attrs, inner) => {
+      return `<blockquote style="${this.styleObjectToString(styles.blockquote)}">${inner}</blockquote>`;
+    });
+
+    // 处理代码块
+    content = content.replace(/<pre([^>]*)><code([^>]*)>(.*?)<\/code><\/pre>/g, (match, preAttrs, codeAttrs, inner) => {
+      return `<pre style="${this.styleObjectToString(styles.pre)}"><code style="${this.styleObjectToString(styles.code)}">${inner}</code></pre>`;
+    });
+
+    // 处理行内代码
+    content = content.replace(/<code([^>]*)>(.*?)<\/code>/g, (match, attrs, inner) => {
+      if (!match.includes('</pre>')) {  // 不处理已经在 pre 标签内的代码
+        return `<code style="${this.styleObjectToString(styles.code)}">${inner}</code>`;
+      }
+      return match;
+    });
+
+    // 处理列表
+    content = content.replace(/<([uo])l([^>]*)>(.*?)<\/\1l>/g, (match, type, attrs, inner) => {
+      const listStyle = this.styleObjectToString(styles.list);
+      const itemStyle = this.styleObjectToString(styles.listItem);
+      const processedInner = inner.replace(/<li([^>]*)>(.*?)<\/li>/g, (m, a, i) => `<li style="${itemStyle}">${i}</li>`);
+      return `<${type}l style="${listStyle}">${processedInner}</${type}l>`;
+    });
+
+    // 处理链接
+    content = content.replace(/<a([^>]*)>(.*?)<\/a>/g, (match, attrs, inner) => {
+      const href = attrs.match(/href="([^"]*)"/);
+      return `<a${attrs} style="${this.styleObjectToString(styles.link)}">${inner}</a>`;
     });
 
     return content;

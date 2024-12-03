@@ -38,45 +38,61 @@ module.exports = {
         root: {
           boxSizing: 'border-box',
           margin: '0',
-          padding: '0',
+          padding: '0 16px',
           fontSize: '16px',
-          fontFamily: 'Optima-Regular, Optima, PingFangSC-light, PingFangTC-light, "PingFang SC", Cambria, Cochin, Georgia, Times, "Times New Roman", serif'
+          fontFamily: 'Optima-Regular, Optima, PingFangSC-light, PingFangTC-light, "PingFang SC", Cambria, Cochin, Georgia, Times, "Times New Roman", serif',
+          color: '#3f3f3f',
+          lineHeight: '1.75'
         },
         heading: {
           boxSizing: 'border-box',
           margin: '0',
           padding: '0',
           marginLeft: '0',
-          color: 'black',
+          color: '#48b378',
           fontSize: '24px',
           textAlign: 'left',
-          fontWeight: 'bold',
+          fontWeight: '600',
           display: 'table',
-          marginTop: '30px',
-          marginBottom: '15px'
+          marginTop: '40px',
+          marginBottom: '20px',
+          borderBottom: '1px solid rgba(72, 179, 120, 0.2)',
+          paddingBottom: '8px',
+          width: '100%',
+          letterSpacing: '0.5px'
         },
         prefix: {
           boxSizing: 'border-box',
           margin: '0',
-          padding: '0'
+          padding: '0',
+          color: '#48b378'
         },
         content: {
           boxSizing: 'border-box',
           margin: '0',
           padding: '0',
-          fontSize: '24px'
+          fontSize: '24px',
+          color: '#48b378'
         },
         suffix: {
           boxSizing: 'border-box',
           margin: '0',
-          padding: '0'
+          padding: '0',
+          color: '#48b378'
+        },
+        paragraph: {
+          margin: '0 0 16px',
+          padding: '0',
+          fontSize: '16px',
+          color: '#3f3f3f',
+          lineHeight: '1.75',
+          letterSpacing: '0.1px'
         },
         figure: {
           boxSizing: 'border-box',
           padding: '0',
-          margin: '0',
-          marginTop: '10px',
-          marginBottom: '10px'
+          margin: '20px 0',
+          textAlign: 'center'
         },
         image: {
           boxSizing: 'border-box',
@@ -84,16 +100,60 @@ module.exports = {
           display: 'block',
           margin: '0 auto',
           width: 'auto',
-          maxWidth: '100%'
+          maxWidth: '100%',
+          borderRadius: '6px',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+          border: '1px solid rgba(0,0,0,0.05)'
         },
         figcaption: {
           boxSizing: 'border-box',
           margin: '0',
           padding: '0',
-          marginTop: '5px',
+          marginTop: '8px',
           textAlign: 'center',
-          color: '#888',
-          fontSize: '14px'
+          color: '#999',
+          fontSize: '14px',
+          fontStyle: 'italic'
+        },
+        blockquote: {
+          margin: '16px 0',
+          padding: '16px',
+          backgroundColor: 'rgba(72, 179, 120, 0.1)',
+          borderLeft: '4px solid #48b378',
+          borderRadius: '0 4px 4px 0',
+          color: '#666'
+        },
+        code: {
+          backgroundColor: '#f8f8f8',
+          color: '#e96900',
+          padding: '2px 6px',
+          borderRadius: '4px',
+          fontSize: '14px',
+          fontFamily: 'Menlo, Monaco, Consolas, "Courier New", monospace'
+        },
+        pre: {
+          margin: '16px 0',
+          padding: '16px',
+          backgroundColor: '#f8f8f8',
+          borderRadius: '6px',
+          overflow: 'auto',
+          fontSize: '14px',
+          lineHeight: '1.6',
+          border: '1px solid #eee'
+        },
+        list: {
+          margin: '16px 0',
+          paddingLeft: '24px'
+        },
+        listItem: {
+          margin: '8px 0',
+          lineHeight: '1.75',
+          color: '#3f3f3f'
+        },
+        link: {
+          color: '#48b378',
+          textDecoration: 'none',
+          borderBottom: '1px solid rgba(72, 179, 120, 0.3)'
         }
       }
     },
