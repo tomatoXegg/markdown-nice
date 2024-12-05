@@ -7,7 +7,7 @@ class MarkdownConverter {
     this.md = new MarkdownIt({
       ...config.markdown,
       html: true,
-      breaks: true,
+      breaks: false,  // 禁用自动换行转换
       linkify: true,
       typographer: true,
       highlight: function (str, lang) {
@@ -121,8 +121,6 @@ class MarkdownConverter {
       .replace(/^(#+)([^\s#])/gm, '$1 $2')
       // 修复多重标题（# 标题 ## 标题2）
       .replace(/(#+ [^#\n]+)#+\s/g, '$1\n\n')
-      // 确保段落之间有空行
-      .replace(/\n(?!\n)/g, '\n\n')
       // 移除多余的空行
       .replace(/\n{3,}/g, '\n\n')
       // 修复图片前后的换行
@@ -151,15 +149,15 @@ class MarkdownConverter {
         return `<section class="img-wrapper">${img}</section>`;
       })
       // 修复段落间距
-      .replace(/<\/p>\s*<p>/g, '</p>\n<p>')
+      .replace(/<\/p>\s*<p>/g, '</p><p>')
       // 移除空段落
       .replace(/<p>\s*<\/p>/g, '')
       // 修复列表格式
-      .replace(/<\/(ol|ul)>\s*<(ol|ul)>/g, '</\$1>\n<\$2>')
+      .replace(/<\/(ol|ul)>\s*<(ol|ul)>/g, '</$1><$2>')
       // 修复代码块格式
       .replace(/<pre><code>/g, '<pre class="code-block"><code>')
       // 移除多余的换行和空格
-      .replace(/\n\s+/g, '\n')
+      .replace(/\n\s+/g, '')
       .trim();
 
     return processed;
