@@ -146,7 +146,7 @@ class MarkdownConverter {
       // 处理图片
       .replace(/<p>(<img[^>]+>)<\/p>/g, (match, img) => {
         if (theme === 'wechat') {
-          return `<p style="text-align: center; margin-bottom: 8px;">${img}</p>`;
+          return `<p style="text-align: center;">${img}</p>`;
         }
         return `<section class="img-wrapper">${img}</section>`;
       })
