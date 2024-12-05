@@ -69,7 +69,7 @@ class MarkdownConverter {
       const srcAttr = src ? ` src="${src[1]}"` : '';
       const imageStyles = {
         ...styles.image,
-        clipPath: 'inset(0 0 10px 0)'  // Crop 10px from bottom
+        clipPath: 'inset(0 0 30px 0)'  // Crop 10px from bottom
       };
       return `<figure style="${this.styleObjectToString(styles.figure)}">
         <img${srcAttr} class="image" style="${this.styleObjectToString(imageStyles)}">
@@ -126,7 +126,7 @@ class MarkdownConverter {
       // 移除多余的空行
       .replace(/\n{3,}/g, '\n\n')
       // 修复图片前后的换行
-      .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '\n\n![$1]($2)\n\n')
+      .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '\n![$1]($2)\n')
       // 修复标题前的换行
       .replace(/([^\n])(\n#+\s)/g, '$1\n\n$2');
 
