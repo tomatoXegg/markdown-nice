@@ -24,7 +24,7 @@ class MarkdownConverter {
     this.md.renderer.rules.image = (tokens, idx) => {
       const token = tokens[idx];
       const src = token.attrGet('src');
-      return `<img src="${src}">`;
+      return `<img src="${src}">`;  // 不在这里添加样式
     };
 
     this.md.use(require('markdown-it-katex'));
@@ -68,13 +68,12 @@ class MarkdownConverter {
       const src = attrs.match(/src="([^"]*)"/);
       const srcAttr = src ? ` src="${src[1]}"` : '';
       const imageStyles = {
-        ...styles.image,
-        clipPath: 'inset(0 0 30px 0)'  // Crop 10px from bottom
+        display: 'block',
+        margin: '0 auto',
+        maxWidth: '100%',
+        clipPath: 'inset(0 0 30px 0)'
       };
-      return `<figure style="${this.styleObjectToString(styles.figure)}">
-        <img${srcAttr} class="image" style="${this.styleObjectToString(imageStyles)}">
-        <figcaption style="${this.styleObjectToString(styles.figcaption)}"></figcaption>
-      </figure>`;
+      return `<img${srcAttr} style="${this.styleObjectToString(imageStyles)}">`;
     });
 
     // 处理引用
@@ -142,12 +141,7 @@ class MarkdownConverter {
         return `<h${level}>${titleContent.trim()}</h${level}>`;
       })
       // 处理图片
-      .replace(/<p>(<img[^>]+>)<\/p>/g, (match, img) => {
-        if (theme === 'wechat') {
-          return `<p style="text-align: center;">${img}</p>`;
-        }
-        return `<section class="img-wrapper">${img}</section>`;
-      })
+      .replace(/<p>(<img[^>]+>)<\/p>/g, '$1')  // 只移除包裹的段落标签，不添加样式
       // 修复段落间距
       .replace(/<\/p>\s*<p>/g, '</p><p>')
       // 移除空段落
