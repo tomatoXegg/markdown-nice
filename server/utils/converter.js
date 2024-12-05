@@ -67,8 +67,12 @@ class MarkdownConverter {
       // 只保留 src 属性
       const src = attrs.match(/src="([^"]*)"/);
       const srcAttr = src ? ` src="${src[1]}"` : '';
+      const imageStyles = {
+        ...styles.image,
+        clipPath: 'inset(0 0 10px 0)'  // Crop 10px from bottom
+      };
       return `<figure style="${this.styleObjectToString(styles.figure)}">
-        <img${srcAttr} class="image" style="${this.styleObjectToString(styles.image)}">
+        <img${srcAttr} class="image" style="${this.styleObjectToString(imageStyles)}">
         <figcaption style="${this.styleObjectToString(styles.figcaption)}"></figcaption>
       </figure>`;
     });
@@ -142,7 +146,7 @@ class MarkdownConverter {
       // 处理图片
       .replace(/<p>(<img[^>]+>)<\/p>/g, (match, img) => {
         if (theme === 'wechat') {
-          return `<p style="text-align: center;">${img}</p>`;
+          return `<p style="text-align: center; margin-bottom: 8px;">${img}</p>`;
         }
         return `<section class="img-wrapper">${img}</section>`;
       })
