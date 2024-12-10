@@ -43,69 +43,46 @@ class MarkdownConverter {
 
   // 处理微信公众号的特殊格式
   processWechatContent(content, styles) {
-    // 处理段落
-    content = content.replace(/<p([^>]*)>(.*?)<\/p>/g, (match, attrs, inner) => {
-      return `<p style="${this.styleObjectToString(styles.paragraph)}">${inner}</p>`;
-    });
+    const elementStyles = {
+      p: styles.paragraph,
+      h1: styles.heading,
+      h2: styles.h2,
+      blockquote: styles.blockquote,
+      pre: styles.pre,
+      code: styles.code,
+      ul: styles.list,
+      ol: styles.list,
+      li: styles.listItem,
+      a: styles.link
+    };
 
-    // 处理标题
-    content = content.replace(/<h1([^>]*)>(.*?)<\/h1>/g, (match, attrs, inner) => {
-      return `<h1 style="${this.styleObjectToString(styles.heading)}">
-        <span class="prefix" style="${this.styleObjectToString(styles.prefix)}"></span>
-        <span class="content" style="${this.styleObjectToString(styles.content)}">${inner}</span>
-        <span class="suffix" style="${this.styleObjectToString(styles.suffix)}"></span>
-      </h1>`;
-    });
+    // 使用单个正则表达式处理所有基本标签
+    content = content.replace(
+      new RegExp(`<(${Object.keys(elementStyles).join('|')})([^>]*)>(.*?)</\\1>`, 'g'),
+      (match, tag, attrs, inner) => {
+        const style = this.styleObjectToString(elementStyles[tag]);
+        return `<${tag} style="${style}">${inner}</${tag}>`;
+      }
+    );
 
-    // 处理二级标题
-    content = content.replace(/<h2([^>]*)>(.*?)<\/h2>/g, (match, attrs, inner) => {
-      return `<h2 style="${this.styleObjectToString(styles.h2)}">${inner}</h2>`;
-    });
-
-    // 处理图片，确保移除 alt 属性
+    // 处理图片
     content = content.replace(/<img([^>]*)>/g, (match, attrs) => {
-      // 只保留 src 属性
       const src = attrs.match(/src="([^"]*)"/);
       const srcAttr = src ? ` src="${src[1]}"` : '';
       const imageStyles = {
         display: 'block',
         margin: '0 auto',
-        maxWidth: '100%',
-        clipPath: 'inset(0 0 30px 0)'
+        maxWidth: '100%'
       };
       return `<img${srcAttr} style="${this.styleObjectToString(imageStyles)}">`;
     });
 
-    // 处理引用
-    content = content.replace(/<blockquote([^>]*)>(.*?)<\/blockquote>/g, (match, attrs, inner) => {
-      return `<blockquote style="${this.styleObjectToString(styles.blockquote)}">${inner}</blockquote>`;
-    });
-
-    // 处理代码块
-    content = content.replace(/<pre([^>]*)><code([^>]*)>(.*?)<\/code><\/pre>/g, (match, preAttrs, codeAttrs, inner) => {
-      return `<pre style="${this.styleObjectToString(styles.pre)}"><code style="${this.styleObjectToString(styles.code)}">${inner}</code></pre>`;
-    });
-
-    // 处理行内代码
-    content = content.replace(/<code([^>]*)>(.*?)<\/code>/g, (match, attrs, inner) => {
-      if (!match.includes('</pre>')) {  // 不处理已经在 pre 标签内的代码
-        return `<code style="${this.styleObjectToString(styles.code)}">${inner}</code>`;
-      }
-      return match;
-    });
-
-    // 处理列表
+    // 处理列表（嵌套情况）
     content = content.replace(/<([uo])l([^>]*)>(.*?)<\/\1l>/g, (match, type, attrs, inner) => {
       const listStyle = this.styleObjectToString(styles.list);
       const itemStyle = this.styleObjectToString(styles.listItem);
       const processedInner = inner.replace(/<li([^>]*)>(.*?)<\/li>/g, (m, a, i) => `<li style="${itemStyle}">${i}</li>`);
       return `<${type}l style="${listStyle}">${processedInner}</${type}l>`;
-    });
-
-    // 处理链接
-    content = content.replace(/<a([^>]*)>(.*?)<\/a>/g, (match, attrs, inner) => {
-      const href = attrs.match(/href="([^"]*)"/);
-      return `<a${attrs} style="${this.styleObjectToString(styles.link)}">${inner}</a>`;
     });
 
     return content;
@@ -162,14 +139,14 @@ class MarkdownConverter {
       // 预处理 Markdown
       const processedMarkdown = this.preprocessMarkdown(markdown);
       
+      // 获取主题
+      const theme = this.getTheme(options.theme);
+      
       // 转换 Markdown 为 HTML
       let html = this.md.render(processedMarkdown);
       
       // 后处理 HTML
-      html = this.postprocessHtml(html, options.theme);
-      
-      // 获取主题
-      const theme = this.getTheme(options.theme);
+      html = this.postprocessHtml(html, theme);
 
       // 如果是微信公众号主题，使用特殊处理
       if (theme.name === '微信公众号') {
@@ -201,6 +178,16 @@ class MarkdownConverter {
     if (!theme) {
       console.warn(`Theme '${themeName}' not found, using default theme`);
       return config.themes.default;
+    }
+    // 验证主题样式是否完整
+    const requiredStyles = ['root', 'paragraph', 'heading', 'h2', 'blockquote', 'code', 'pre', 'list', 'listItem', 'link'];
+    const missingStyles = requiredStyles.filter(style => !theme.styles[style]);
+    if (missingStyles.length > 0) {
+      console.warn(`Theme '${themeName}' is missing required styles: ${missingStyles.join(', ')}`);
+      // 使用默认主题的缺失样式进行补充
+      missingStyles.forEach(style => {
+        theme.styles[style] = config.themes.default.styles[style];
+      });
     }
     return theme;
   }
